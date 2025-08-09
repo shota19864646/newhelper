@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>訪問ケア・クエスト｜新人ヘルパー編（第1〜14章）</title>
+<style>
+  :root{--bg:#f7f7fb;--card:#ffffff;--ink:#0f172a;--muted:#64748b;--accent:#2563eb;--good:#16a34a;--bad:#dc2626;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Arial,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:18px}
+  h1{margin:8px 0 0 0;font-size:22px}
+  .sub{color:var(--muted);margin:4px 0 16px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .card{background:var(--card);border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.08);padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:8px;border:1px solid #e5e7eb}
+  .card:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(0,0,0,.12)}
+  .tag{display:inline-block;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:999px;padding:2px 8px;font-size:12px;margin-right:4px}
+  .play{margin-top:auto;align-self:flex-end;background:#111827;color:#fff;border:0;border-radius:10px;padding:8px 12px;font-weight:700}
+  .stage{background:var(--card);border-radius:16px;box-shadow:0 10px 28px rgba(0,0,0,.10);overflow:hidden;display:none;margin-top:6px}
+  .scene{padding:14px;border-bottom:1px solid #eee}
+  .row{display:flex;gap:10px;align-items:flex-start}
+  .char{flex:1;background:#f3f4f6;border-radius:12px;padding:10px}
+  .char h3{margin:0 0 6px 0;font-size:15px}
+  .char .face{font-size:26px;line-height:1.2}
+  .bubble{background:#eef2ff;border-left:4px solid var(--accent);padding:10px;border-radius:8px}
+  .bubble p{margin:0;font-size:15px}
+  .system{padding:10px 14px;background:#ecfeff;border-left:4px solid #06b6d4}
+  .choices{display:grid;grid-template-columns:1fr;gap:8px;padding:12px}
+  .choices button{appearance:none;border:0;border-radius:10px;padding:11px 12px;font-size:15px;font-weight:700;background:#111827;color:#fff;cursor:pointer}
+  .choices button.secondary{background:#334155}
+  .choices button.warn{background:#b91c1c}
+  .choices button:hover{filter:brightness(1.05)}
+  .result{padding:12px;display:none}
+  .result.good{background:#ecfdf5;border-left:4px solid var(--good)}
+  .result.bad{background:#fef2f2;border-left:4px solid var(--bad)}
+  .footer{display:flex;gap:8px;justify-content:flex-end;padding:12px;border-top:1px solid #eee}
+  .footer button{appearance:none;border:0;background:#2563eb;color:#fff;padding:10px 12px;border-radius:10px;font-weight:700}
+  .footer button.alt{background:#475569}
+  .meter{margin-top:8px;height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+  .meter>div{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#16a34a);transition:width .5s}
+  .badge{display:inline-block;background:#111827;color:#fff;border-radius:999px;padding:4px 10px;font-size:12px;margin-left:8px}
+  .topbar{display:flex;gap:10px;align-items:center;justify-content:space-between}
+  .back{appearance:none;border:0;background:#111827;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700}
+  .muted{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>訪問ケア・クエスト｜新人ヘルパー編（第1〜14章）</h1>
+      <p class="sub">主人公：<strong>ことはさん（新人ヘルパー）</strong>／ことはケアサービス｜セーブ不要・スマホOK｜選択肢で学ぶ</p>
+    </div>
+    <button class="back" id="toMenu" style="display:none" onclick="toMenu()">章一覧へ</button>
+  </div>
+
+  <div id="menu"><div class="grid" id="cards"></div></div>
+
+  <div class="stage" id="game">
+    <div class="scene">
+      <div class="row">
+        <div class="char"><h3>ことはさん（新人ヘルパー）</h3><div class="face" id="kotohaFace">😅</div><div class="muted">※やや緊張</div></div>
+        <div class="char"><h3>奈良子さん</h3><div class="face" id="narakoFace">🙂</div><div class="muted">※表情が変わります</div></div>
+        <div class="char"><h3>奈良男さん</h3><div class="face" id="naraoFace">🕴️</div><div class="muted">※必要時に登場</div></div>
+      </div>
+    </div>
+
+    <div class="system"><span id="chapterTitle"></span> <span class="badge" id="badge">設問1/2</span></div>
+    <div class="scene"><div class="bubble" id="dialogue"></div></div>
+    <div class="choices" id="choices"></div>
+    <div class="result" id="resultBox"></div>
+
+    <div class="scene" id="summaryBox" style="display:none">
+      <h3>章のまとめ</h3>
+      <p id="summaryText"></p>
+      <div class="meter"><div id="meterBar"></div></div>
+    </div>
+
+    <div class="footer">
+      <button class="alt" onclick="restart()">この章をやり直す</button>
+      <button id="nextBtn" onclick="next()">次へ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== シナリオ定義（1〜14章＋4.5章） ======
+const chapters = [
+  { id:'1', title:'第1章：初回訪問の挨拶', q:[
+    { text:'ことは：「本日から担当いたします、ことはです。よろしくお願いします！」<br/>奈良子：「若いのねぇ。ちゃんとできる？」',
+      opts:[ ['元気よく任せてください！',+15,'good','自信を示しつつ丁寧。'],
+             ['正直に勉強中ですが頑張ります',+10,'good','等身大の姿勢が安心感に。'],
+             ['無言で作業を始める',-15,'bad','黙って始めるのはNG。'] ]},
+    { text:'奈良子：「洗濯物は触らんといて。」どう返す？',
+      opts:[ ['理由を丁寧に伺う',+20,'good','不安の言語化→共有。観察力＋1'],
+             ['いったん様子見を提案',+5,'neutral','次の声かけが鍵。'],
+             ['時間がないのでやりますと強行',-20,'bad','奈良男さんが反発。'] ]}
+  ]},
+  { id:'2', title:'第2章：衛生管理（手洗い・消毒）', q:[
+    { text:'訪問直後の手指衛生、最適なタイミングは？',
+      opts:[ ['入室前と入室直後の2回',+15,'good','接触前に確実に。'],
+             ['作業後にまとめて1回',-10,'bad','前処置が抜ける。'],
+             ['全く不要',-20,'bad','感染リスク上昇。'] ]},
+    { text:'アルコール消毒が使えない場合は？',
+      opts:[ ['流水と石鹸で20秒以上',+15,'good','基本を徹底。'],
+             ['濡れタオルで拭くだけ',-10,'bad','不十分。'],
+             ['消毒は省略',-20,'bad','NG。'] ]}
+  ]},
+  { id:'3', title:'第3章：服薬確認', q:[
+    { text:'朝の服薬、確認の第一声は？',
+      opts:[ ['「いつも通り飲めていますか？」',+10,'good','本人確認から。'],
+             ['「薬はどこ？」だけ聞く',-5,'neutral','質問が曖昧。'],
+             ['袋を開けて勝手に渡す',-15,'bad','事故リスク。'] ]},
+    { text:'残薬が多いと判明。どうする？',
+      opts:[ ['ケアマネ・家族へ報告し記録',+15,'good','連携・記録が基本。'],
+             ['今日分をまとめて飲ませる',-20,'bad','危険。'],
+             ['見なかったことにする',-15,'bad','リスク隠し。'] ]}
+  ]},
+  { id:'4', title:'第4章：食事介助', q:[
+    { text:'食事前の観察ポイントは？',
+      opts:[ ['姿勢・嚥下・意識・義歯',+15,'good','安全第一。'],
+             ['テーブルの色だけ確認',-10,'bad','本質でない。'],
+             ['確認せず開始',-20,'bad','誤嚥リスク。'] ]},
+    { text:'むせ込みが増えた。対応は？',
+      opts:[ ['一旦中止し姿勢と水分で調整',+15,'good','安全配慮。'],
+             ['急いで食べさせる',-20,'bad','事故に直結。'],
+             ['放置する',-20,'bad','危険。'] ]}
+  ]},
+  { id:'4.5', title:'第4.5章：介護保険外の依頼（奈良男さん）', q:[
+    { text:'奈良男：「ついでに庭の草むしりと車の洗車もお願いできます？」',
+      opts:[ ['はい、やります！（そのまま受ける）',-20,'bad','不正サービス。信頼低下。'],
+             ['保険では不可。自費サービスをご案内',+20,'good','正解。代替提案が◎。'],
+             ['忙しいので無理、とだけ断る',-10,'neutral','言い方の配慮不足。'] ]},
+    { text:'さらに「通帳の引き出しも…」と言われた場合は？',
+      opts:[ ['第三者の金銭管理は不可と説明＋記録',+20,'good','ルール遵守と記録。'],
+             ['内緒で少額なら対応',-20,'bad','コンプラ違反。'],
+             ['黙ってスルー',-10,'bad','曖昧対応は火種。'] ]}
+  ]},
+  { id:'5', title:'第5章：移動・移乗介助', q:[
+    { text:'立位が不安定。最初に確認するのは？',
+      opts:[ ['足元・ブレーキ・体調',+15,'good','基本の3点。'],
+             ['気合い',-10,'bad','根性論NG。'],
+             ['家具を引っ張る',-15,'bad','転倒リスク。'] ]},
+    { text:'ベッド→車椅子の移乗、声かけは？',
+      opts:[ ['「1,2,3で立ちます」等の予告',+15,'good','合図で同期。'],
+             ['無言で持ち上げる',-15,'bad','恐怖＆怪我の元。'],
+             ['腰を引っ張る',-10,'bad','腰痛リスク。'] ]}
+  ]},
+  { id:'6', title:'第6章：清掃・生活援助', q:[
+    { text:'掃除の優先順位は？',
+      opts:[ ['動線・水回り・衛生最優先',+15,'good','安全重視。'],
+             ['見栄え重視',-10,'bad','本末転倒。'],
+             ['利用者の了承なく模様替え',-15,'bad','同意が必要。'] ]},
+    { text:'洗濯で色移りリスク。どうする？',
+      opts:[ ['分別＋確認して進める',+15,'good','説明と同意。'],
+             ['まとめて洗う',-15,'bad','事故の元。'],
+             ['放置',-10,'bad','家事放棄。'] ]}
+  ]},
+  { id:'7', title:'第7章：排泄介助', q:[
+    { text:'プライバシー配慮で重要なのは？',
+      opts:[ ['声かけ・カーテン・同意',+15,'good','尊厳を守る。'],
+             ['早さ重視',-10,'bad','尊厳軽視。'],
+             ['無言で実施',-15,'bad','不安が増える。'] ]},
+    { text:'異常尿を発見。対応は？',
+      opts:[ ['観察記録→報連相',+15,'good','迅速連携。'],
+             ['様子見で放置',-15,'bad','悪化リスク。'],
+             ['写真だけ撮る',-10,'bad','機密・同意に配慮不足。'] ]}
+  ]},
+  { id:'8', title:'第8章：認知症の方との会話', q:[
+    { text:'「家に帰る」と不安な様子。どう声かけ？',
+      opts:[ ['気持ちを受け止め安心を提供',+15,'good','共感が基本。'],
+             ['現実を突きつける',-10,'bad','対立に。'],
+             ['無視する',-15,'bad','不安増大。'] ]},
+    { text:'同じ質問を繰り返す。対応は？',
+      opts:[ ['短く優しく繰り返し回答',+10,'good','安心の継続。'],
+             ['イラつきを見せる',-15,'bad','不信に。'],
+             ['別の話題へ柔らかく転換',+10,'good','不安の分散。'] ]}
+  ]},
+  { id:'9', title:'第9章：緊急対応（転倒・体調急変）', q:[
+    { text:'転倒発見。最初の行動は？',
+      opts:[ ['意識・呼吸・出血を確認',+20,'good','一次評価。'],
+             ['すぐ起こす',-15,'bad','二次被害。'],
+             ['叱る',-20,'bad','論外。'] ]},
+    { text:'急変時、連絡先の優先は？',
+      opts:[ ['救急→家族→事業所→記録',+20,'good','命優先。'],
+             ['家族だけ',-10,'bad','手順不足。'],
+             ['記録だけ',-20,'bad','遅延。'] ]}
+  ]},
+  { id:'10', title:'第10章：記録と報告', q:[
+    { text:'記録の原則は？',
+      opts:[ ['事実・時間・誰が・何を',+15,'good','5W1Hの核。'],
+             ['感想メイン',-10,'bad','主観過多。'],
+             ['後でまとめて想像で',-20,'bad','改ざんリスク。'] ]},
+    { text:'ヒヤリ発生。対応は？',
+      opts:[ ['上長・ケアマネへ報告し是正',+15,'good','学びに。'],
+             ['隠す',-20,'bad','再発必至。'],
+             ['同僚にだけ愚痴る',-10,'bad','拡散リスク。'] ]}
+  ]},
+  { id:'11', title:'第11章：買い物を一緒に行う（共に行う介護）', q:[
+    { text:'買い物の前に確認することは？',
+      opts:[ ['体調・財布・行先・時間',+15,'good','準備が自立を支える。'],
+             ['自分の好みで決める',-10,'bad','本人主体で。'],
+             ['ノープランで出発',-10,'bad','混乱に。'] ]},
+    { text:'レジで混乱。どう支える？',
+      opts:[ ['小額から・ゆっくり促す',+10,'good','成功体験を守る。'],
+             ['代わりに全部払う',-10,'bad','自立を奪う。'],
+             ['叱責する',-15,'bad','関係悪化。'] ]}
+  ]},
+  { id:'12', title:'第12章：洗濯物を一緒に干す（共に行う介護）', q:[
+    { text:'役割分担は？',
+      opts:[ ['高所はヘルパー、低い位置は本人',+15,'good','安全＋自立。'],
+             ['全部ヘルパーがやる',-10,'bad','機会喪失。'],
+             ['全部本人に任せる',-10,'bad','危険。'] ]},
+    { text:'疲労サイン。対応は？',
+      opts:[ ['いったん休憩・座位で続行',+15,'good','無理なく。'],
+             ['そのまま続ける',-10,'bad','転倒リスク。'],
+             ['作業終了を強要',-10,'bad','不信感。'] ]}
+  ]},
+  { id:'13', title:'第13章：料理を一緒に作る（共に行う介護）', q:[
+    { text:'包丁使用時の工夫は？',
+      opts:[ ['滑り止め・見守り・声かけ',+15,'good','安全第一。'],
+             ['離席して任せる',-15,'bad','危険。'],
+             ['握力テストのみ',-5,'neutral','不十分。'] ]},
+    { text:'味付けのこだわり。対応は？',
+      opts:[ ['本人の嗜好を尊重',+10,'good','満足度UP。'],
+             ['自分の味にする',-10,'bad','不満に。'],
+             ['塩分過多を推奨',-15,'bad','健康被害。'] ]}
+  ]},
+  { id:'14', title:'第14章：掃除を一緒にする（共に行う介護）', q:[
+    { text:'掃除範囲の合意は？',
+      opts:[ ['優先順位を一緒に決める',+15,'good','本人主体。'],
+             ['勝手に全入れ替え',-15,'bad','混乱。'],
+             ['何も決めない',-10,'bad','非効率。'] ]},
+    { text:'重い家具移動を希望。対応は？',
+      opts:[ ['安全第一で別案提示',+15,'good','代替策。'],
+             ['一人で強行',-15,'bad','怪我リスク。'],
+             ['怒って断る',-10,'bad','関係悪化。'] ]}
+  ]},
+];
+
+// ====== ゲーム状態 ======
+let trust = 0, qIndex = 0, currentChapter = null;
+
+// ====== 要素 ======
+const menu = document.getElementById('menu');
+const cards = document.getElementById('cards');
+const game = document.getElementById('game');
+const badge = document.getElementById('badge');
+const chapTitle = document.getElementById('chapterTitle');
+const dialogue = document.getElementById('dialogue');
+const choices = document.getElementById('choices');
+const resultBox = document.getElementById('resultBox');
+const kFace = document.getElementById('kotohaFace');
+const nFace = document.getElementById('narakoFace');
+const oFace = document.getElementById('naraoFace');
+const nextBtn = document.getElementById('nextBtn');
+const toMenuBtn = document.getElementById('toMenu');
+const summaryBox = document.getElementById('summaryBox');
+const summaryText = document.getElementById('summaryText');
+const meterBar = document.getElementById('meterBar');
+
+// ====== メニュー描画 ======
+function buildMenu(){
+  cards.innerHTML = '';
+  chapters.forEach((ch)=>{
+    const c = document.createElement('div');
+    c.className = 'card';
+    const tags = document.createElement('div');
+    const t2 = document.createElement('span'); t2.className='tag'; t2.textContent = (parseFloat(ch.id)<=10?'新人ヘルパー':'共に行う介護');
+    tags.appendChild(t2);
+    const h = document.createElement('div'); h.innerHTML = `<strong>${ch.title}</strong>`;
+    const s = document.createElement('div'); s.className='muted'; s.textContent = `設問 ${ch.q.length} 問／クリックで開始`;
+    const b = document.createElement('button'); b.className='play'; b.textContent='この章で遊ぶ'; b.onclick = ()=>startChapter(ch);
+    c.appendChild(tags); c.appendChild(h); c.appendChild(s); c.appendChild(b);
+    cards.appendChild(c);
+  });
+}
+buildMenu();
+
+// ====== 章開始 ======
+function startChapter(ch){
+  currentChapter = ch;
+  trust = 0; qIndex = 0;
+  kFace.textContent = '😅'; nFace.textContent='🙂'; oFace.textContent='🕴️';
+  chapTitle.textContent = ch.title;
+  menu.style.display='none'; game.style.display='block'; toMenuBtn.style.display='inline-block';
+  summaryBox.style.display='none'; resultBox.style.display='none'; nextBtn.style.display='none';
+  renderQuestion();
+}
+
+// ====== 設問描画 ======
+function renderQuestion(){
+  const q = currentChapter.q[qIndex];
+  badge.textContent = `設問${qIndex+1}/${currentChapter.q.length}`;
+  dialogue.innerHTML = q.text;
+  choices.innerHTML = '';
+  resultBox.style.display='none';
+  q.opts.forEach((op,i)=>{
+    const b = document.createElement('button');
+    b.textContent = (i===0?'1️⃣ ':'')+(i===1?'2️⃣ ':'')+(i===2?'3️⃣ ':'') + op[0];
+    if(i===1) b.classList.add('secondary');
+    if(i===2) b.classList.add('warn');
+    b.onclick = ()=>{
+      trust += op[1];
+      const kind = op[2], msg=op[3];
+      if(kind==='good'){ nFace.textContent='😊'; resultBox.className='result good'; }
+      else if(kind==='bad'){ nFace.textContent='😠'; oFace.textContent='😡'; resultBox.className='result bad'; }
+      else { nFace.textContent='😕'; resultBox.className='result'; }
+      resultBox.innerHTML = `<strong>結果：</strong>${msg}（信頼 ${trust>=0?'+':''}${op[1]}）`;
+      resultBox.style.display='block';
+      Array.from(choices.querySelectorAll('button')).forEach(x=>x.disabled=true);
+      nextBtn.style.display='inline-block';
+    };
+    choices.appendChild(b);
+  });
+}
+
+// ====== 次へ／終了 ======
+function next(){
+  qIndex++;
+  if(qIndex >= currentChapter.q.length){ finishChapter(); }
+  else { resultBox.style.display='none'; nextBtn.style.display='none'; renderQuestion(); }
+}
+
+function finishChapter(){
+  const max = currentChapter.q.length*20;
+  const pct = Math.max(0, Math.min(100, (trust/max)*100));
+  const grade = pct>=80?'S（とても良い）':pct>=60?'A（良い）':pct>=40?'B（ふつう）':'C（見直し）';
+  summaryText.innerHTML = `最終評価：<strong>${grade}</strong><br/>獲得スコア：信頼 ${trust} / ${max}<br/>学び：<ul><li>本人の意思を尊重し理由を聴く</li><li>安全と手順を共有</li><li>家族任せ・強行は避け、代替提案</li></ul>`;
+  meterBar.style.width = pct + '%';
+  summaryBox.style.display='block';
+  nextBtn.style.display='none';
+  choices.innerHTML='';
+}
+
+function restart(){
+  trust = 0; qIndex = 0;
+  kFace.textContent = '😅'; nFace.textContent='🙂'; oFace.textContent='🕴️';
+  summaryBox.style.display='none'; resultBox.style.display='none'; nextBtn.style.display='none';
+  renderQuestion();
+}
+
+function toMenu(){
+  game.style.display='none'; menu.style.display='block'; toMenuBtn.style.display='none';
+}
+</script>
+</body>
+</html>
